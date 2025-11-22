@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Aplikasi Absensi - GitHub Pages</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--glass: rgba(255,255,255,0.03)}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;background:linear-gradient(180deg,#071024 0%, #071834 100%);color:#e6eef6;min-height:100vh}
+    /* centered app container */
+    .app{max-width:1100px;margin:24px auto;padding:18px}
+    .card{background:var(--card);border-radius:14px;padding:20px;box-shadow:0 6px 18px rgba(2,6,23,0.6);backdrop-filter: blur(6px)}
+
+    /* LOGIN */
+    .login-wrap{display:flex;align-items:center;justify-content:center;height:70vh}
+    .login-card{width:100%;max-width:420px}
+    h1{margin:0 0 10px 0;font-size:20px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type=text], input[type=password], select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;font-size:14px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:9px;border:0;background:linear-gradient(90deg,var(--accent),#0ea5a3);color:#042024;font-weight:600;cursor:pointer}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* Dashboard layout */
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo .dot{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#0891b2);display:flex;align-items:center;justify-content:center;font-weight:700;color:#042024}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:900px){.grid{grid-template-columns:360px 1fr}}
+
+    /* form card */
+    .form-card{display:flex;flex-direction:column;gap:12px}
+    .field{display:flex;flex-direction:column;gap:6px}
+
+    /* Bento grid */
+    .bento{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(min-width:600px){.bento{grid-template-columns:repeat(3,1fr)}}
+    .bento .tile{background:var(--glass);padding:14px;border-radius:12px;min-height:90px;display:flex;flex-direction:column;justify-content:center}
+    .tile h3{margin:0;font-size:14px}
+    .tile p{margin:6px 0 0 0;color:var(--muted);font-size:13px}
+
+    /* table */
+    .table-wrap{overflow:auto;margin-top:12px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px 8px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px}
+    th{color:var(--muted);font-weight:600}
+
+    /* small helpers */
+    .right{display:flex;gap:8px;align-items:center}
+    .hint{font-size:12px;color:var(--muted)}
+
+    /* responsive tweaks */
+    @media(max-width:520px){.login-wrap{height:80vh}.card{padding:14px}}
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login" class="card login-wrap">
+      <div class="login-card">
+        <h1>Masuk ke Aplikasi Absensi</h1>
+        <p class="muted">Masukkan username dan password untuk melanjutkan.</p>
+        <div style="height:12px"></div>
+        <div class="field">
+          <label>Username</label>
+          <input id="username" type="text" placeholder="username" value="" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input id="password" type="password" placeholder="password" value="" />
+        </div>
+        <div style="height:12px"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="hint">username: <strong>benga76</strong> | password: <strong>benga76</strong></div>
+          <button id="loginBtn" class="btn">Konfirmasi</button>
+        </div>
+        <p id="loginError" class="muted" style="color:#ffb4b4;margin-top:8px;display:none">Username atau password salah.</p>
+      </div>
+    </div>
+
+    <!-- DASHBOARD / HALAMAN KEDUA -->
+    <div id="dash" style="display:none">
+      <div class="topbar">
+        <div class="logo"><div class="dot">AB</div><div>
+          <div style="font-weight:700">Aplikasi Absensi</div>
+          <div class="muted" style="font-size:12px">Simple — GitHub Pages + Apps Script</div>
+        </div></div>
+        <div class="right">
+          <div class="muted">User: <strong>benga76</strong></div>
+          <button id="logout" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit">Keluar</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- left: form -->
+        <div class="card form-card">
+          <h3>Input Data Absensi</h3>
+          <div class="field">
+            <label>NAMA SISWA</label>
+            <input id="nama" type="text" placeholder="Nama Siswa" />
+          </div>
+          <div class="field">
+            <label>KELAS</label>
+            <input id="kelas" type="text" placeholder="Kelas" />
+          </div>
+          <div class="field">
+            <label>TANGGAL</label>
+            <input id="tanggal" type="date" />
+          </div>
+
+          <div class="field">
+            <label>Keterangan</label>
+            <select id="keterangan">
+              <option value="hadir">hadir</option>
+              <option value="sakit">sakit</option>
+              <option value="izin">izin</option>
+              <option value="alpa">alpa</option>
+            </select>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="confirmBtn" class="btn">Konfirmasi</button>
+            <button id="clearBtn" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.04);color:inherit">Bersihkan</button>
+          </div>
+          <p id="submitMsg" class="muted" style="margin-top:8px;display:none"></p>
+
+          <div class="table-wrap card" style="margin-top:10px;padding:10px">
+            <h4 style="margin:0 0 8px 0">Riwayat Input</h4>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Data disimpan di browser (local) dan dikirim ke Apps Script.</div>
+            <div style="overflow:auto">
+              <table id="historyTable">
+                <thead><tr><th>#</th><th>NAMA SISWA</th><th>KELAS</th><th>TANGGAL</th><th>KETERANGAN</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- right: bento grid -->
+        <div>
+          <div class="card">
+            <h3 style="margin:0 0 10px 0">Dashboard (Bento Grid)</h3>
+            <div class="bento" id="bentoGrid">
+              <div class="tile"><h3>Total Entries</h3><p id="statTotal">0</p></div>
+              <div class="tile"><h3>Hadir</h3><p id="statHadir">0</p></div>
+              <div class="tile"><h3>Sakit</h3><p id="statSakit">0</p></div>
+              <div class="tile"><h3>Izin</h3><p id="statIzin">0</p></div>
+              <div class="tile"><h3>Alpa</h3><p id="statAlpa">0</p></div>
+              <div class="tile"><h3>Last Sent</h3><p id="statLast">-</p></div>
+            </div>
+          </div>
+
+          <div style="height:12px"></div>
+          <div class="card">
+            <h4 style="margin:0 0 8px 0">Petunjuk</h4>
+            <div class="muted" style="font-size:13px">Pastikan Apps Script sudah di-deploy untuk menerima request dari origin GitHub Pages ("Anyone, even anonymous"). Jika permintaan gagal karena CORS, Anda perlu men-deploy ulang Apps Script dengan pengaturan akses publik.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- configuration ---
+    const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCZlBB06jDmdzP5dPdktA09Ufyk1HBm76S47WAXDOLvfMYeLVwXxw7RfIv6asTG_2arg/exec';
+    const AUTH = {user:'benga76', pass:'benga76'};
+
+    // elements
+    const loginDiv = document.getElementById('login');
+    const dashDiv = document.getElementById('dash');
+    const loginBtn = document.getElementById('loginBtn');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginError = document.getElementById('loginError');
+    const logoutBtn = document.getElementById('logout');
+
+    const namaEl = document.getElementById('nama');
+    const kelasEl = document.getElementById('kelas');
+    const tanggalEl = document.getElementById('tanggal');
+    const ketEl = document.getElementById('keterangan');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const submitMsg = document.getElementById('submitMsg');
+
+    const historyTableBody = document.querySelector('#historyTable tbody');
+    const statTotal = document.getElementById('statTotal');
+    const statHadir = document.getElementById('statHadir');
+    const statSakit = document.getElementById('statSakit');
+    const statIzin = document.getElementById('statIzin');
+    const statAlpa = document.getElementById('statAlpa');
+    const statLast = document.getElementById('statLast');
+
+    // localStorage key
+    const STORAGE_KEY = 'absensi_history_v1';
+
+    // --- auth & navigation ---
+    loginBtn.addEventListener('click', ()=>{
+      const u = usernameInput.value.trim();
+      const p = passwordInput.value.trim();
+      if(u === AUTH.user && p === AUTH.pass){
+        loginError.style.display = 'none';
+        loginDiv.style.display = 'none';
+        dashDiv.style.display = '';
+        loadHistory();
+      } else {
+        loginError.style.display = '';
+      }
+    });
+
+    logoutBtn.addEventListener('click', ()=>{
+      dashDiv.style.display = 'none';
+      loginDiv.style.display = '';
+      usernameInput.value = '';
+      passwordInput.value = '';
+    });
+
+    // --- actions ---
+    clearBtn.addEventListener('click', ()=>{
+      namaEl.value = '';
+      kelasEl.value = '';
+      tanggalEl.value = '';
+      ketEl.selectedIndex = 0;
+    });
+
+    confirmBtn.addEventListener('click', async ()=>{
+      const nama = namaEl.value.trim();
+      const kelas = kelasEl.value.trim();
+      const tanggal = tanggalEl.value; // date input returns YYYY-MM-DD
+      const keterangan = ketEl.value;
+
+      if(!nama || !kelas || !tanggal){
+        showMsg('Semua kolom wajib diisi (Nama, Kelas, Tanggal).', true);
+        return;
+      }
+
+      const entry = {nama, kelas, tanggal, keterangan, ts: new Date().toISOString()};
+
+      // optimistically update UI/local history
+      saveToHistory(entry);
+      showMsg('Mengirim data ke server...', false);
+
+      // send to Apps Script
+      try{
+        // use form-encoded POST
+        const form = new URLSearchParams();
+        form.append('nama', nama);
+        form.append('kelas', kelas);
+        form.append('tanggal', tanggal);
+        form.append('keterangan', keterangan);
+
+        const res = await fetch(APP_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: form.toString(),
+          mode: 'cors'
+        });
+
+        // try to parse JSON/text
+        let text = await res.text();
+        if(res.ok){
+          showMsg('Berhasil mengirim data ke server. (server response: '+truncate(text,200)+')', false);
+          statLast.textContent = new Date().toLocaleString();
+        } else {
+          showMsg('Server merespon error: '+res.status+' — '+truncate(text,200), true);
+        }
+      }catch(err){
+        showMsg('Gagal mengirim: '+err.message, true);
+      }
+
+      // reset inputs
+      namaEl.value = '';
+      kelasEl.value = '';
+      tanggalEl.value = '';
+      ketEl.selectedIndex = 0;
+      updateStats();
+    });
+
+    function showMsg(txt, isError){
+      submitMsg.style.display = '';
+      submitMsg.style.color = isError? '#ffb4b4' : 'lightgreen';
+      submitMsg.textContent = txt;
+      setTimeout(()=>{ submitMsg.style.display = 'none'; }, 5000);
+    }
+
+    function truncate(s,n){ return s.length>n? s.slice(0,n)+'...': s }
+
+    // --- history (local storage) ---
+    function loadHistory(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const data = raw? JSON.parse(raw): [];
+      renderHistory(data);
+      updateStats();
+    }
+
+    function saveToHistory(entry){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const data = raw? JSON.parse(raw): [];
+      data.unshift(entry); // newest first
+      // keep last 200 entries only
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.slice(0,200)));
+      renderHistory(data);
+    }
+
+    function renderHistory(data){
+      historyTableBody.innerHTML = '';
+      (data||[]).forEach((row, idx)=>{
+        const tr = document.createElement('tr');
+        const i = document.createElement('td'); i.textContent = idx+1;
+        const n = document.createElement('td'); n.textContent = row.nama;
+        const k = document.createElement('td'); k.textContent = row.kelas;
+        const t = document.createElement('td'); t.textContent = row.tanggal;
+        const s = document.createElement('td'); s.textContent = row.keterangan;
+        tr.appendChild(i);tr.appendChild(n);tr.appendChild(k);tr.appendChild(t);tr.appendChild(s);
+        historyTableBody.appendChild(tr);
+      });
+    }
+
+    function updateStats(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const data = raw? JSON.parse(raw): [];
+      const total = data.length;
+      statTotal.textContent = total;
+      statHadir.textContent = data.filter(d=>d.keterangan==='hadir').length;
+      statSakit.textContent = data.filter(d=>d.keterangan==='sakit').length;
+      statIzin.textContent = data.filter(d=>d.keterangan==='izin').length;
+      statAlpa.textContent = data.filter(d=>d.keterangan==='alpa').length;
+    }
+
+    // initialize date default
+    (function init(){
+      // set sample placeholder values (optional)
+      // tanggalEl.value = new Date().toISOString().slice(0,10);
+    })();
+
+  </script>
+</body>
+</html>
